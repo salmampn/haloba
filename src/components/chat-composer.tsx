@@ -20,7 +20,7 @@ export function ChatComposer({
       onSubmit={onSubmit}
       className="shrink-0 border-t border-slate-300/10 bg-[#091a33]/95 px-4 py-4 backdrop-blur-xl sm:px-6"
     >
-      <div className="mx-auto max-w-4xl rounded-2xl border border-sky-300/15 bg-[#0c1d38] p-2 shadow-[0_12px_48px_rgba(0,0,0,0.24)] transition duration-200 focus-within:border-sky-300/50 focus-within:bg-[#102544] focus-within:ring-4 focus-within:ring-sky-400/10">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-sky-300/15 bg-[#0c1d38] p-2 shadow-[0_12px_48px_rgba(0,0,0,0.24)] transition duration-200 focus-within:border-sky-300/50 focus-within:bg-[#102544] focus-within:ring-4 focus-within:ring-sky-400/10">
         <div className="flex items-end gap-2">
           <textarea
             value={input}

@@ -1,17 +1,143 @@
 PANDUAN KARYAWAN MINI
 
-1. Cuti Tahunan
+1. CUTI TAHUNAN
+
 Setiap karyawan tetap memperoleh 12 hari cuti tahunan setelah melewati masa kerja selama tiga bulan.
 
-2. Reimbursement Transportasi
+Pengajuan cuti dilakukan melalui sistem HR paling lambat tiga hari kerja sebelum tanggal cuti, kecuali dalam keadaan darurat.
+
+Atasan dapat menyetujui atau menolak pengajuan cuti berdasarkan kebutuhan operasional tim.
+
+
+2. REIMBURSEMENT TRANSPORTASI
+
 Karyawan dapat mengajukan reimbursement transportasi untuk perjalanan dinas.
+
 Batas maksimum reimbursement transportasi adalah Rp150.000 per hari.
+
 Bukti pembayaran wajib dilampirkan maksimal tujuh hari setelah perjalanan dinas selesai.
 
-3. Jam Kerja
+Reimbursement yang diajukan setelah batas waktu dapat ditolak oleh tim Finance.
+
+
+3. JAM KERJA DAN HYBRID WORK
+
 Jam kerja reguler adalah Senin sampai Jumat, pukul 09.00 hingga 18.00 WIB.
+
+Karyawan memperoleh waktu istirahat pukul 12.00 hingga 13.00 WIB.
+
 Karyawan dapat bekerja hybrid maksimal dua hari per minggu dengan persetujuan atasan.
 
-4. Peralatan Kerja
+Jadwal kerja hybrid harus dikomunikasikan kepada atasan dan anggota tim.
+
+
+4. PERALATAN KERJA
+
 Karyawan dapat meminjam laptop perusahaan sesuai kebutuhan pekerjaan.
+
+Laptop perusahaan hanya digunakan untuk kegiatan pekerjaan yang sah.
+
 Laptop wajib dikembalikan saat masa kerja berakhir.
+
+Karyawan bertanggung jawab menjaga perangkat perusahaan dan melaporkan kehilangan atau kerusakan secepatnya.
+
+
+5. BENEFIT DAN KOMPENSASI
+
+Gaji dibayarkan setiap tanggal 25 melalui rekening bank yang terdaftar pada sistem HR.
+
+Jika tanggal 25 jatuh pada hari libur, pembayaran dilakukan pada hari kerja sebelumnya.
+
+Karyawan tetap didaftarkan pada program BPJS Kesehatan dan BPJS Ketenagakerjaan sesuai ketentuan perusahaan.
+
+Perusahaan menyediakan asuransi kesehatan tambahan untuk karyawan tetap setelah melewati masa kerja selama tiga bulan.
+
+Karyawan tetap menerima tunjangan komunikasi sebesar Rp200.000 per bulan.
+
+Tunjangan komunikasi dibayarkan bersamaan dengan gaji bulanan.
+
+Bonus kinerja bersifat tidak tetap dan ditentukan berdasarkan hasil evaluasi perusahaan serta kinerja individu.
+
+
+6. LEMBUR DAN HARI LIBUR
+
+Lembur hanya dapat dilakukan apabila terdapat kebutuhan pekerjaan yang mendesak.
+
+Karyawan wajib memperoleh persetujuan atasan sebelum melakukan lembur.
+
+Pengajuan lembur dicatat melalui sistem internal pada hari kerja yang sama.
+
+Karyawan yang telah memperoleh persetujuan lembur dapat menerima kompensasi sesuai kebijakan perusahaan.
+
+Hari libur nasional mengikuti kalender resmi pemerintah Indonesia.
+
+Karyawan yang diwajibkan bekerja pada hari libur nasional harus memperoleh persetujuan atasan.
+
+Atasan dapat memberikan cuti pengganti untuk pekerjaan pada hari libur apabila kebutuhan operasional memungkinkan.
+
+Cuti pengganti harus digunakan dalam jangka waktu tiga bulan sejak tanggal kerja pada hari libur.
+
+
+7. PERJALANAN DINAS
+
+Perjalanan dinas harus memperoleh persetujuan atasan sebelum tiket atau akomodasi dipesan.
+
+Karyawan wajib mengajukan tujuan perjalanan, jadwal, estimasi biaya, dan kebutuhan transportasi melalui sistem internal.
+
+Transportasi perjalanan dinas dapat menggunakan pesawat, kereta api, kendaraan umum, atau kendaraan pribadi sesuai persetujuan.
+
+Pemilihan transportasi harus mempertimbangkan biaya, waktu, dan kebutuhan pekerjaan.
+
+Akomodasi hotel dipesan sesuai anggaran yang telah disetujui oleh atasan.
+
+Biaya perjalanan dinas dapat diklaim dengan bukti pembayaran yang sah.
+
+Biaya di luar anggaran harus mendapat persetujuan tambahan dari atasan.
+
+Karyawan wajib menyerahkan laporan singkat perjalanan dinas paling lambat tiga hari kerja setelah kembali.
+
+
+8. KEAMANAN DATA DAN PENGGUNAAN PERANGKAT
+
+Karyawan wajib menggunakan password yang kuat dan tidak membagikan password kepada pihak lain.
+
+Password akun kerja harus memiliki minimal 12 karakter dan mengandung kombinasi huruf, angka, serta simbol.
+
+Karyawan wajib menggunakan autentikasi dua faktor apabila tersedia.
+
+Data internal perusahaan, data pelanggan, dan data karyawan hanya boleh digunakan untuk keperluan pekerjaan.
+
+Karyawan dilarang mengirim data internal ke email pribadi atau menyimpan data perusahaan pada layanan penyimpanan pribadi tanpa persetujuan.
+
+Dokumen sensitif hanya boleh dibagikan kepada pihak yang memiliki kebutuhan kerja yang sah.
+
+Karyawan tidak boleh memasang perangkat lunak ilegal atau aplikasi yang tidak disetujui pada perangkat perusahaan.
+
+Perangkat harus dikunci saat ditinggalkan dan diperbarui secara berkala.
+
+Kehilangan perangkat, dugaan kebocoran data, email phishing, atau akses tidak sah harus segera dilaporkan kepada tim IT.
+
+Laporan insiden harus dikirim paling lambat 24 jam setelah insiden diketahui.
+
+
+9. ONBOARDING KARYAWAN
+
+Karyawan baru mengikuti sesi orientasi pada hari pertama kerja.
+
+Sesi orientasi mencakup pengenalan perusahaan, struktur tim, kebijakan dasar, dan prosedur kerja.
+
+Karyawan baru diperkenalkan kepada atasan langsung dan anggota tim terkait.
+
+Karyawan wajib menyerahkan dokumen identitas, data rekening bank, NPWP apabila ada, dan dokumen pendukung lain yang diminta tim People Operations.
+
+Dokumen administrasi harus diserahkan maksimal lima hari kerja setelah tanggal mulai bekerja.
+
+Tim IT menyiapkan email perusahaan, akun sistem kerja, dan perangkat kerja yang diperlukan.
+
+Karyawan wajib mengganti password awal akun kerja saat pertama kali login.
+
+Masa percobaan bagi karyawan baru berlangsung selama tiga bulan.
+
+Selama masa percobaan, karyawan mengikuti evaluasi bersama atasan langsung.
+
+Setelah masa percobaan selesai, status kerja ditinjau berdasarkan hasil evaluasi dan kebutuhan perusahaan.

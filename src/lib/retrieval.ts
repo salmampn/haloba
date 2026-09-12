@@ -16,71 +16,46 @@ export type RetrievalResult = {
   };
 };
 
-const SIMILARITY_THRESHOLD = 0.5;
-const MATCH_COUNT = 3;
+const SIMILARITY_THRESHOLD = 0.7;
+const SEMANTIC_CANDIDATE_COUNT = 5;
 
-function getKeywords(query: string) {
-  const stopWords = new Set([
-    "apa",
-    "apakah",
-    "adalah",
-    "berapa",
-    "bagaimana",
-    "kapan",
-    "dimana",
-    "di",
-    "ke",
-    "dari",
-    "dan",
-    "atau",
-    "untuk",
-    "yang",
-    "ini",
-    "itu",
-    "saya",
-    "kami",
-    "karyawan",
-    "perusahaan",
-  ]);
+const MAX_CONTEXT_CHUNKS = 2;
+const MAX_CONTEXT_CHARS = 2_000;
 
-  return query
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .split(/\s+/)
-    .filter((word) => word.length >= 3 && !stopWords.has(word));
-}
+function selectChunksForContext(
+  chunks: RetrievedChunk[]
+): RetrievedChunk[] {
+  const selectedChunks: RetrievedChunk[] = [];
+  let totalChars = 0;
 
-function scoreLexicalMatch(content: string, keywords: string[]) {
-  const normalizedContent = content.toLowerCase();
+  const sortedChunks = [...chunks].sort(
+    (a, b) => b.similarity - a.similarity
+  );
 
-  return keywords.reduce((score, keyword) => {
-    return normalizedContent.includes(keyword) ? score + 1 : score;
-  }, 0);
-}
+  for (const chunk of sortedChunks) {
+    if (selectedChunks.length >= MAX_CONTEXT_CHUNKS) {
+      break;
+    }
 
-async function lexicalFallback(query: string): Promise<RetrievedChunk[]> {
-  const keywords = getKeywords(query);
+    const content = chunk.content.trim();
 
-  if (keywords.length === 0) {
-    return [];
-  }
+    if (!content) {
+      continue;
+    }
 
-  const { data, error } = await supabaseAdmin
-    .from("document_chunks")
-    .select("id, document_id, content");
+    if (totalChars + content.length > MAX_CONTEXT_CHARS) {
+      continue;
+    }
 
-  if (error) {
-    throw new Error(`Lexical fallback failed: ${error.message}`);
-  }
-
-  return (data ?? [])
-    .map((chunk) => ({
+    selectedChunks.push({
       ...chunk,
-      similarity: scoreLexicalMatch(chunk.content, keywords),
-    }))
-    .filter((chunk) => chunk.similarity > 0)
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, MATCH_COUNT);
+      content,
+    });
+
+    totalChars += content.length;
+  }
+
+  return selectedChunks;
 }
 
 export async function retrieveRelevantChunks(
@@ -94,7 +69,7 @@ export async function retrieveRelevantChunks(
     "match_document_chunks",
     {
       query_embedding: queryEmbedding,
-      match_count: MATCH_COUNT,
+      match_count: SEMANTIC_CANDIDATE_COUNT,
     } as never
   );
 
@@ -102,45 +77,12 @@ export async function retrieveRelevantChunks(
     throw new Error(`Vector search failed: ${error.message}`);
   }
 
-  const rawSemanticChunks = (data ?? []) as RetrievedChunk[];
-
-  // if (process.env.NODE_ENV !== "production") {
-  //   console.log("\nRAW SEMANTIC RETRIEVAL RESULTS:");
-
-  //   for (const chunk of rawSemanticChunks) {
-  //     console.log({
-  //       similarity: chunk.similarity,
-  //       preview: chunk.content.slice(0, 160),
-  //     });
-  //   }
-  // }
-
-  const semanticChunks = rawSemanticChunks.filter(
-    (chunk) => chunk.similarity >= SIMILARITY_THRESHOLD
-  );
-
-  if (semanticChunks.length > 0) {
-    return {
-      chunks: semanticChunks,
-      embeddingUsage: embeddingResult.usage,
-    };
-  }
-
-  const fallbackChunks = await lexicalFallback(query);
-
-  // if (process.env.NODE_ENV !== "production") {
-  //   console.log("\nLEXICAL FALLBACK RESULTS:");
-
-  //   for (const chunk of fallbackChunks) {
-  //     console.log({
-  //       lexicalScore: chunk.similarity,
-  //       preview: chunk.content.slice(0, 160),
-  //     });
-  //   }
-  // }
+  const semanticChunks = ((data ?? []) as RetrievedChunk[])
+    .filter((chunk) => chunk.similarity >= SIMILARITY_THRESHOLD)
+    .sort((a, b) => b.similarity - a.similarity);
 
   return {
-    chunks: fallbackChunks,
+    chunks: selectChunksForContext(semanticChunks),
     embeddingUsage: embeddingResult.usage,
   };
 }
