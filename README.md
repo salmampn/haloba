@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Nama proyek:
+Multi-Agent Document Chat
 
-## Getting Started
+Tujuan:
+Membuat aplikasi chat dengan satu UI, tetapi dua agent di backend:
+Manager untuk pertanyaan umum dan Specialist untuk pertanyaan berbasis dokumen.
 
-First, run the development server:
+Tech stack:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js + TypeScript + Tailwind CSS
+- Supabase PostgreSQL + pgvector
+- Gemini API
+- @google/genai
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Agent:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Manager: menjawab pertanyaan umum
+- Specialist: menjawab berdasarkan dokumen
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Routing:
 
-## Learn More
+- Keyword-based routing, tanpa LLM router pada MVP
 
-To learn more about Next.js, take a look at the following resources:
+Dokumen:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Satu dokumen handbook/policy sederhana
+- Dokumen dipecah menjadi beberapa chunk
+- Embedding disimpan di Supabase
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Data yang disimpan:
 
-## Deploy on Vercel
+- Conversation ID
+- Pesan user
+- Jawaban assistant
+- Agent yang menjawab
+- Input token
+- Output token
+- Embedding token
+- Total token
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Tidak termasuk scope MVP:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Login/authentication
+- Upload PDF
+- Streaming response
+- Multi-user
+- Dashboard analytics kompleks
+- Banyak dokumen
