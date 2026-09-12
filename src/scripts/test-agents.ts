@@ -8,11 +8,11 @@ async function main() {
   const { answerWithSpecialist } = await import("../lib/agents/specialist");
 
   const testQueries = [
-    "Apa itu Next.js?",
+    // "Apa itu Next.js?",
     "Berapa hari cuti tahunan karyawan?",
-    "Berapa batas reimbursement transportasi?",
+    // "Berapa batas reimbursement transportasi?",
     "Jam kerja dimulai pukul berapa?",
-    "Apakah perusahaan memberikan bonus saham tahunan?",
+    // "Apakah perusahaan memberikan bonus saham tahunan?",
   ];
 
   for (const query of testQueries) {
