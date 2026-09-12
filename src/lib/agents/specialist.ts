@@ -139,15 +139,15 @@ export async function answerWithSpecialist(
   const { chunks, embeddingUsage } = await retrieveRelevantChunks(message);
   const embeddingTokens = embeddingUsage.totalTokens;
 
-  if (process.env.NODE_ENV !== "production") {
-    console.log("SPECIALIST RETRIEVAL", {
-      message,
-      chunks: chunks.map((chunk) => ({
-        similarity: chunk.similarity,
-        preview: chunk.content.slice(0, 150),
-      })),
-    });
-  }
+  // if (process.env.NODE_ENV !== "production") {
+  //   console.log("SPECIALIST RETRIEVAL", {
+  //     message,
+  //     chunks: chunks.map((chunk) => ({
+  //       similarity: chunk.similarity,
+  //       preview: chunk.content.slice(0, 150),
+  //     })),
+  //   });
+  // }
 
   if (chunks.length === 0) {
     return createNoContextResult(embeddingTokens);
