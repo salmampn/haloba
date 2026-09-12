@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,9 +11,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Synapse",
-  description: "Multi-Agent Knowledge Chat",
+export const metadata = {
+  title: "HALOBA | Multi-Agent Knowledge Assistant",
+  description:
+    "A multi-agent knowledge workspace powered by Gemini and Supabase.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

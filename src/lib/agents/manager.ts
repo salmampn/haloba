@@ -17,7 +17,7 @@ arahkan user ke knowledge base.
 export async function answerWithManager(
   message: string
 ): Promise<AgentResult> {
-  const model = process.env.GENERAL_MODEL ?? "gemini-3.8-flash";
+  const model = process.env.MANAGER_MODEL ?? "gemini-3.8-flash";
 
   const response = await gemini.models.generateContent({
     model,

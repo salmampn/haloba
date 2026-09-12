@@ -3,8 +3,8 @@ import {
   Bot,
   CheckCircle2,
   Database,
-  Sparkles,
 } from "lucide-react";
+import Image from "next/image";
 
 type AppSidebarProps = {
   className?: string;
@@ -22,15 +22,28 @@ export function AppSidebar({
       className={`aurora-scrollbar h-full w-72 shrink-0 flex-col overflow-y-auto border-r border-slate-300/10 bg-[#0a1930]/75 p-5 backdrop-blur-xl ${visibilityClass} ${className}`}
     >
       <div className="flex items-center gap-3 px-2">
-        <div className="flex size-10 items-center justify-center rounded-2xl border border-sky-300/25 bg-sky-400/10 text-sky-200 shadow-[0_0_28px_rgba(56,189,248,0.18)]">
-          <Sparkles className="size-5" />
+        <div className="relative flex size-12 shrink-0 items-center justify-center overflow-visible">
+          <Image
+            src="/logo.png"
+            alt="HALOBA logo"
+            fill
+            priority
+            sizes="48px"
+            className="object-contain drop-shadow-[0_0_6px_rgba(56,189,248,0.95)]"
+          />
+
+          <span className="pointer-events-none absolute -inset-2 -z-10 rounded-full bg-cyan-400/20 blur-xl" />
+          <span className="pointer-events-none absolute -inset-4 -z-10 rounded-full bg-indigo-500/15 blur-2xl" />
         </div>
 
         <div>
           <p className="text-sm font-semibold tracking-wide text-slate-100">
-            SYNAPSE
+            HALOBA
           </p>
-          <p className="text-xs text-slate-300/55">Knowledge workspace</p>
+
+          <p className="text-xs text-slate-300/55">
+            Internal Knowledge Assistant
+          </p>
         </div>
       </div>
 
@@ -50,7 +63,10 @@ export function AppSidebar({
                 <p className="text-sm font-semibold text-slate-100">
                   Manager
                 </p>
-                <p className="text-xs text-slate-300/55">General Q&amp;A</p>
+
+                <p className="text-xs text-slate-300/55">
+                  General Q&amp;A
+                </p>
               </div>
             </div>
 
@@ -69,7 +85,10 @@ export function AppSidebar({
                 <p className="text-sm font-semibold text-slate-100">
                   Specialist
                 </p>
-                <p className="text-xs text-slate-300/55">Document RAG</p>
+
+                <p className="text-xs text-slate-300/55">
+                  Document RAG
+                </p>
               </div>
             </div>
 
@@ -95,15 +114,17 @@ export function AppSidebar({
               <p className="text-sm font-medium text-slate-100">
                 Employee Handbook
               </p>
+
               <p className="mt-1 text-xs leading-5 text-slate-300/55">
-                Cuti, reimbursement, jam kerja, dan peralatan kerja.
+                Cuti, reimbursement, jam kerja, benefit, keamanan data, dan
+                onboarding.
               </p>
             </div>
           </div>
 
           <div className="mt-4 flex items-center gap-2 text-xs text-slate-200/70">
             <CheckCircle2 className="size-3.5 text-sky-300" />
-            4 document chunks indexed
+            Employee handbook indexed
           </div>
         </div>
       </div>
@@ -115,7 +136,9 @@ export function AppSidebar({
             <span className="relative inline-flex size-2.5 rounded-full bg-sky-300" />
           </span>
 
-          <p className="text-xs font-medium text-slate-200">System online</p>
+          <p className="text-xs font-medium text-slate-200">
+            System online
+          </p>
         </div>
 
         <p className="mt-2 text-xs leading-5 text-slate-300/50">

@@ -6,7 +6,7 @@ async function main() {
   const { gemini } = await import("../lib/gemini");
 
   const response = await gemini.models.generateContent({
-    model: process.env.GENERAL_MODEL ?? "gemini-2.5-flash",
+    model: process.env.MANAGER_MODEL ?? "gemini-3.8-flash",
     contents: "Balas hanya dengan kata: siap",
   });
 

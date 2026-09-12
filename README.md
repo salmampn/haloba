@@ -1,6 +1,6 @@
-# SYNAPSE — Multi-Agent Knowledge Chat
+# HALOBA — Multi-Agent Knowledge Chat
 
-SYNAPSE adalah aplikasi chat berbasis **Next.js**, **Google Gemini**, dan **Supabase pgvector** untuk menjawab pertanyaan umum serta pertanyaan kebijakan internal berbasis knowledge base.
+HALOBA adalah aplikasi chat berbasis **Next.js**, **Google Gemini**, dan **Supabase pgvector** untuk menjawab pertanyaan umum serta pertanyaan kebijakan internal berbasis knowledge base.
 
 Aplikasi menggunakan arsitektur multi-agent ringan:
 
@@ -142,7 +142,7 @@ Create `.env` in the project root:
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 
-SUPABASE_URL=[https://your-project-ref.supabase.co](https://your-project-ref.supabase.co)
+NEXT_PUBLIC_SUPABASE_URL=[https://your-project-ref.supabase.co](https://your-project-ref.supabase.co)
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_SECRET_KEY=your_supabase_secret_key
 
