@@ -22,8 +22,7 @@ export async function answerWithSpecialist(
   const { chunks, embeddingUsage } = await retrieveRelevantChunks(message);
 
   if (chunks.length === 0) {
-    const fallbackAnswer =
-      "Saya tidak menemukan informasi tersebut pada dokumen yang tersedia.";
+    const fallbackAnswer = "Saya tidak menemukan informasi terkait pertanyaan tersebut pada dokumen yang tersedia.";
 
     return {
       answer: fallbackAnswer,

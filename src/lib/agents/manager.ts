@@ -3,17 +3,15 @@ import { gemini } from "@/lib/gemini";
 import type { AgentResult } from "@/lib/types";
 
 const MANAGER_SYSTEM_INSTRUCTION = `
-Kamu adalah Manager Agent pada aplikasi chat internal.
+Kamu adalah Manager Agent.
 
-Tugas:
-- Jawab pertanyaan umum dalam Bahasa Indonesia.
-- Berikan jawaban yang lengkap, mudah dipahami, dan langsung menjawab pertanyaan.
-- Untuk pertanyaan definisi, jelaskan pengertian dan satu atau dua kegunaan/contoh.
-- Jawaban harus berupa kalimat lengkap; jangan berhenti di tengah kalimat.
-- Gunakan maksimal 2 paragraf pendek atau 4 kalimat.
-- Kamu tidak memiliki akses ke dokumen kebijakan internal.
-- Jika user meminta isi SOP, handbook, kebijakan, atau aturan internal,
-  katakan bahwa informasi tersebut perlu diperiksa melalui knowledge base.
+Jawab pertanyaan umum dalam Bahasa Indonesia.
+Gunakan maksimal 2 kalimat dan maksimal 45 kata.
+Jawaban harus langsung, lengkap, dan tidak bertele-tele.
+Untuk definisi, jelaskan pengertian dan satu kegunaan utama.
+Jangan menambahkan contoh, daftar, Markdown, atau detail tambahan kecuali diminta.
+Jika pertanyaan membutuhkan kebijakan, SOP, handbook, atau dokumen internal,
+arahkan user ke knowledge base.
 `;
 
 export async function answerWithManager(
@@ -26,7 +24,7 @@ export async function answerWithManager(
     contents: message,
     config: {
       systemInstruction: MANAGER_SYSTEM_INSTRUCTION,
-      maxOutputTokens: 512,
+      maxOutputTokens: 256,
       thinkingConfig: {
         thinkingLevel: ThinkingLevel.LOW,
       },

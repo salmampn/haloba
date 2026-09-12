@@ -8,6 +8,7 @@ const SPECIALIST_KEYWORDS = [
   "sop",
   "kebijakan",
   "aturan",
+
   "cuti",
   "reimbursement",
   "transportasi",
@@ -15,6 +16,20 @@ const SPECIALIST_KEYWORDS = [
   "hybrid",
   "laptop perusahaan",
   "peralatan kerja",
+
+  "bonus",
+  "saham",
+  "benefit",
+  "tunjangan",
+  "kompensasi",
+  "gaji",
+  "insentif",
+  "asuransi",
+  "bpjs",
+  "lembur",
+  "libur",
+  "hr",
+  "people",
 ];
 
 export type RouteDecision = {
