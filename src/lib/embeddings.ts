@@ -11,6 +11,7 @@ export type EmbeddingResult = {
 export async function createEmbedding(
   text: string
 ): Promise<EmbeddingResult> {
+
   const response = await gemini.models.embedContent({
     model: process.env.EMBEDDING_MODEL!,
     contents: text,

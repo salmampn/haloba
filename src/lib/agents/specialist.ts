@@ -9,7 +9,7 @@ knowledge base internal.
 
 Aturan wajib:
 - Gunakan hanya informasi yang terdapat di CONTEXT.
-- Jangan membuat fakta, angka, kebijakan, tanggal, atau aturan baru.
+- Jangan membuat fakta, angka, kebijakan, tanggal, atau aturan baru yang tidak ada pada CONTEXT.
 - Jika jawaban tidak ada di CONTEXT, katakan:
   "Saya tidak menemukan informasi tersebut pada dokumen yang tersedia."
 - Gunakan Bahasa Indonesia.
@@ -64,7 +64,7 @@ ${message}
     contents: prompt,
     config: {
     systemInstruction: SPECIALIST_SYSTEM_INSTRUCTION,
-    maxOutputTokens: 512,
+    maxOutputTokens: 128,
     thinkingConfig: {
         thinkingLevel: ThinkingLevel.LOW,
     },
