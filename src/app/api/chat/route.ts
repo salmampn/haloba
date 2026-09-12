@@ -15,7 +15,19 @@ const chatRequestSchema = z.object({
     .max(2000, "Message is too long."),
 });
 
-function getSafeErrorMessage(error: unknown) {
+type ErrorCategory =
+  | "network"
+  | "rate_limit"
+  | "validation"
+  | "internal";
+
+type SafeError = {
+  message: string;
+  status: number;
+  category: ErrorCategory;
+};
+
+function getSafeErrorMessage(error: unknown): SafeError {
   const rawError =
     error instanceof Error ? error.message : JSON.stringify(error);
 
@@ -33,6 +45,7 @@ function getSafeErrorMessage(error: unknown) {
       message:
         "Layanan AI sedang mencapai batas penggunaan. Tunggu sebentar, lalu coba kirim pesan lagi.",
       status: 429,
+      category: "rate_limit",
     };
   }
 
@@ -52,6 +65,7 @@ function getSafeErrorMessage(error: unknown) {
       message:
         "Koneksi ke layanan AI sedang terganggu. Pesan Anda belum dapat diproses. Silakan coba lagi beberapa saat lagi.",
       status: 503,
+      category: "network",
     };
   }
 
@@ -59,10 +73,43 @@ function getSafeErrorMessage(error: unknown) {
     message:
       "Terjadi kesalahan saat memproses pertanyaan Anda. Silakan coba lagi.",
     status: 500,
+    category: "internal",
   };
 }
 
+async function saveErrorMessage(
+  conversationId: string | undefined,
+  safeError: SafeError
+) {
+  if (!conversationId) {
+    return;
+  }
+
+  const { error } = await supabaseAdmin.from("messages").insert({
+    conversation_id: conversationId,
+    role: "error",
+    content: safeError.message,
+
+    error_code: safeError.status,
+    error_category: safeError.category,
+
+    router_input_tokens: 0,
+    router_output_tokens: 0,
+    embedding_tokens: 0,
+    llm_input_tokens: 0,
+    llm_output_tokens: 0,
+    thought_tokens: 0,
+    total_tokens: 0,
+  });
+
+  if (error) {
+    console.error("Failed to save error message:", error.message);
+  }
+}
+
 export async function POST(request: Request) {
+  let conversationId: string | undefined;
+
   try {
     let requestBody: unknown;
 
@@ -104,7 +151,7 @@ export async function POST(request: Request) {
       message,
     } = parsedRequest.data;
 
-    let conversationId = rawConversationId ?? undefined;
+    conversationId = rawConversationId ?? undefined;
 
     if (!conversationId) {
       const { data: conversation, error: conversationError } =
@@ -205,9 +252,14 @@ export async function POST(request: Request) {
 
     const safeError = getSafeErrorMessage(error);
 
+    await saveErrorMessage(conversationId, safeError);
+
     return Response.json(
       {
+        conversationId,
         error: safeError.message,
+        errorCode: safeError.status,
+        errorCategory: safeError.category,
       },
       {
         status: safeError.status,
