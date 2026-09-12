@@ -5,7 +5,7 @@ loadEnvConfig(process.cwd());
 async function main() {
   const { retrieveRelevantChunks } = await import("../lib/retrieval");
 
-  const query = "Apakah boleh bekerja dari rumah (WFH)?";
+  const query = "Jam kerja dimulai pukul berapa?";
 
   const result = await retrieveRelevantChunks(query);
 

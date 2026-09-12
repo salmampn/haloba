@@ -16,7 +16,7 @@ export type RetrievalResult = {
   };
 };
 
-const SIMILARITY_THRESHOLD = 0.7;
+const SIMILARITY_THRESHOLD = 0.5;
 const MATCH_COUNT = 3;
 
 export async function retrieveRelevantChunks(
@@ -24,10 +24,17 @@ export async function retrieveRelevantChunks(
 ): Promise<RetrievalResult> {
   const embeddingResult = await createEmbedding(query);
 
+  console.log(
+    "Query embedding dimensions:",
+    embeddingResult.embedding.length
+  );
+
+  const queryEmbedding = `[${embeddingResult.embedding.join(",")}]`;
+
   const { data, error } = await supabaseAdmin.rpc(
     "match_document_chunks",
     {
-      query_embedding: embeddingResult.embedding,
+      query_embedding: queryEmbedding,
       match_count: MATCH_COUNT,
     }
   );
@@ -36,7 +43,17 @@ export async function retrieveRelevantChunks(
     throw new Error(`Vector search failed: ${error.message}`);
   }
 
-  const chunks = ((data ?? []) as RetrievedChunk[]).filter(
+  const rawChunks = (data ?? []) as RetrievedChunk[];
+
+  console.log("\nRAW RETRIEVAL RESULTS:");
+  for (const chunk of rawChunks) {
+    console.log({
+      similarity: chunk.similarity,
+      preview: chunk.content.slice(0, 160),
+    });
+  }
+
+  const chunks = rawChunks.filter(
     (chunk) => chunk.similarity >= SIMILARITY_THRESHOLD
   );
 

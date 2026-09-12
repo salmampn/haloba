@@ -78,6 +78,7 @@ async function seedDocument() {
 }
 
 seedDocument().catch((error) => {
-  console.error("Seeding failed:", error);
+  console.error("Seeding failed:");
+  console.error(error);
   process.exit(1);
 });
