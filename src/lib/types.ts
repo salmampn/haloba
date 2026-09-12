@@ -24,6 +24,7 @@ export type ChatMessageItem = {
   role: ChatMessageRole;
   content: string;
   answeredBy?: AgentName;
+  model?: string;
   usage?: TokenUsage;
   processingTimeMs?: number;
 };

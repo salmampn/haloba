@@ -103,6 +103,7 @@ export function useChat() {
           role: "assistant",
           content: data.answer,
           answeredBy: data.answeredBy,
+          model: data.model,
           usage: data.usage,
           processingTimeMs: data.processingTimeMs,
         };

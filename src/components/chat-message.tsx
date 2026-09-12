@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
   BadgeCheck,
@@ -9,6 +9,7 @@ import {
   CircleAlert,
   Copy,
   Database,
+  FileQuestion,
   UserRound,
 } from "lucide-react";
 
@@ -16,12 +17,13 @@ type ChatMessageProps = {
   role: "user" | "assistant" | "error";
   content: string;
   answeredBy?: "manager" | "specialist";
+  model?: string;
   totalTokens?: number;
   processingTimeMs?: number;
 };
 
 function formatProcessingTime(processingTimeMs?: number) {
-  if (!processingTimeMs) {
+  if (processingTimeMs === undefined || processingTimeMs === null) {
     return null;
   }
 
@@ -32,10 +34,37 @@ function formatProcessingTime(processingTimeMs?: number) {
   return `${(processingTimeMs / 1000).toFixed(1)}s`;
 }
 
+function getAnswerMetadata(
+  answeredBy?: "manager" | "specialist",
+  model?: string
+) {
+  const isNoDocumentMatch = model === "no-generation-needed";
+
+  if (answeredBy === "manager") {
+    return {
+      label: "General response",
+      icon: BrainCircuit,
+    };
+  }
+
+  if (isNoDocumentMatch) {
+    return {
+      label: "No matching document found",
+      icon: FileQuestion,
+    };
+  }
+
+  return {
+    label: "Document-grounded answer",
+    icon: Database,
+  };
+}
+
 export function ChatMessage({
   role,
   content,
   answeredBy,
+  model,
   totalTokens,
   processingTimeMs,
 }: ChatMessageProps) {
@@ -45,7 +74,24 @@ export function ChatMessage({
   const isUser = role === "user";
   const isError = role === "error";
   const isSpecialist = answeredBy === "specialist";
-  const formattedProcessingTime = formatProcessingTime(processingTimeMs);
+
+  const isNoDocumentMatch =
+    model === "no-generation-needed";
+
+  const formattedProcessingTime = formatProcessingTime(
+    processingTimeMs
+  );
+
+  const answerMetadata = getAnswerMetadata(answeredBy, model);
+  const AnswerMetadataIcon = answerMetadata.icon;
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        window.clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   async function handleCopy() {
     try {
@@ -100,13 +146,17 @@ export function ChatMessage({
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
           isUser
             ? "border-sky-300/30 bg-sky-400/15 text-sky-200"
-            : isSpecialist
-              ? "border-indigo-300/25 bg-indigo-400/10 text-indigo-200"
-              : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
+            : isNoDocumentMatch
+              ? "border-amber-300/25 bg-amber-400/10 text-amber-200"
+              : isSpecialist
+                ? "border-indigo-300/25 bg-indigo-400/10 text-indigo-200"
+                : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
         }`}
       >
         {isUser ? (
           <UserRound className="h-4 w-4" />
+        ) : isNoDocumentMatch ? (
+          <FileQuestion className="h-4 w-4" />
         ) : isSpecialist ? (
           <Database className="h-4 w-4" />
         ) : (
@@ -127,13 +177,19 @@ export function ChatMessage({
           {!isUser && answeredBy && (
             <span
               className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium ${
-                isSpecialist
-                  ? "border-indigo-300/25 bg-indigo-400/10 text-indigo-200"
-                  : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
+                isNoDocumentMatch
+                  ? "border-amber-300/25 bg-amber-400/10 text-amber-200"
+                  : isSpecialist
+                    ? "border-indigo-300/25 bg-indigo-400/10 text-indigo-200"
+                    : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
               }`}
             >
               <BadgeCheck className="h-3 w-3" />
-              {isSpecialist ? "Specialist" : "Manager"}
+              {isNoDocumentMatch
+                ? "No document match"
+                : isSpecialist
+                  ? "Specialist"
+                  : "Manager"}
             </span>
           )}
         </div>
@@ -142,7 +198,9 @@ export function ChatMessage({
           className={`rounded-2xl px-4 py-3.5 text-left text-sm leading-6 shadow-sm ${
             isUser
               ? "rounded-tr-md border border-sky-300/20 bg-sky-400 text-[#07111f]"
-              : "rounded-tl-md border border-slate-300/10 bg-white/5 text-slate-100 backdrop-blur-sm"
+              : isNoDocumentMatch
+                ? "rounded-tl-md border border-amber-300/15 bg-amber-400/5 text-slate-100 backdrop-blur-sm"
+                : "rounded-tl-md border border-slate-300/10 bg-white/5 text-slate-100 backdrop-blur-sm"
           }`}
         >
           {isUser ? (
@@ -224,10 +282,9 @@ export function ChatMessage({
 
             <span className="h-1 w-1 rounded-full bg-slate-300/30" />
 
-            <span>
-              {isSpecialist
-                ? "Document-grounded answer"
-                : "General response"}
+            <span className="inline-flex items-center gap-1">
+              <AnswerMetadataIcon className="h-3.5 w-3.5" />
+              {answerMetadata.label}
             </span>
 
             <button

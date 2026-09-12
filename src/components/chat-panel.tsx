@@ -51,6 +51,7 @@ export function ChatPanel({
                     role={message.role}
                     content={message.content}
                     answeredBy={message.answeredBy}
+                    model={message.model}
                     totalTokens={message.usage?.totalTokens}
                     processingTimeMs={message.processingTimeMs}
                   />
