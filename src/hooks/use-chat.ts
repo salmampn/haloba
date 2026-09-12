@@ -67,8 +67,6 @@ export function useChat() {
       setInput("");
       setIsLoading(true);
 
-      const requestStartedAt = performance.now();
-
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
@@ -98,10 +96,6 @@ export function useChat() {
           throw new Error("Respons chat dari server tidak lengkap.");
         }
 
-        const responseTimeMs = Math.round(
-          performance.now() - requestStartedAt
-        );
-
         setConversationId(data.conversationId);
 
         const assistantMessage: ChatMessageItem = {
@@ -110,7 +104,7 @@ export function useChat() {
           content: data.answer,
           answeredBy: data.answeredBy,
           usage: data.usage,
-          responseTimeMs,
+          processingTimeMs: data.processingTimeMs,
         };
 
         setMessages((currentMessages) => [

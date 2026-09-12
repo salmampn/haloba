@@ -8,19 +8,70 @@ export const runtime = "nodejs";
 
 const chatRequestSchema = z.object({
   conversationId: z.string().uuid().nullish(),
-  message: z.string().trim().min(1, "Message cannot be empty.").max(2000),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Message cannot be empty.")
+    .max(2000, "Message is too long."),
 });
+
+function getSafeErrorMessage(error: unknown) {
+  const rawError =
+    error instanceof Error ? error.message : JSON.stringify(error);
+
+  const normalizedError = rawError.toLowerCase();
+
+  const isRateLimited =
+    normalizedError.includes("429") ||
+    normalizedError.includes("resource_exhausted") ||
+    normalizedError.includes("resource exhausted") ||
+    normalizedError.includes("quota") ||
+    normalizedError.includes("rate limit");
+
+  if (isRateLimited) {
+    return {
+      message:
+        "Layanan AI sedang mencapai batas penggunaan. Tunggu sebentar, lalu coba kirim pesan lagi.",
+      status: 429,
+    };
+  }
+
+  const isNetworkError =
+    normalizedError.includes("fetch failed") ||
+    normalizedError.includes("connecttimeout") ||
+    normalizedError.includes("connect timeout") ||
+    normalizedError.includes("network") ||
+    normalizedError.includes("gateway") ||
+    normalizedError.includes("bad gateway") ||
+    normalizedError.includes("502") ||
+    normalizedError.includes("503") ||
+    normalizedError.includes("504");
+
+  if (isNetworkError) {
+    return {
+      message:
+        "Koneksi ke layanan AI sedang terganggu. Pesan Anda belum dapat diproses. Silakan coba lagi beberapa saat lagi.",
+      status: 503,
+    };
+  }
+
+  return {
+    message:
+      "Terjadi kesalahan saat memproses pertanyaan Anda. Silakan coba lagi.",
+    status: 500,
+  };
+}
 
 export async function POST(request: Request) {
   try {
-    let body: unknown;
+    let requestBody: unknown;
 
     try {
-      body = await request.json();
+      requestBody = await request.json();
     } catch {
       return Response.json(
         {
-          error: "Invalid JSON request body.",
+          error: "Request body harus berupa JSON yang valid.",
         },
         {
           status: 400,
@@ -28,27 +79,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const parsedBody = chatRequestSchema.safeParse(body);
+    const parsedRequest = chatRequestSchema.safeParse(requestBody);
 
-    if (!parsedBody.success) {
-        console.error(
-            "Invalid chat request body:",
-            body,
-            parsedBody.error.issues
-        );
+    if (!parsedRequest.success) {
+      console.error(
+        "Invalid chat request:",
+        requestBody,
+        parsedRequest.error.issues
+      );
 
-        return Response.json(
-            {
-            error: "Invalid request data.",
-            details: parsedBody.error.issues,
-            },
-            {
-            status: 400,
-            }
-        );
+      return Response.json(
+        {
+          error: "Invalid request data.",
+          details: parsedRequest.error.issues,
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    const { conversationId: rawConversationId, message } = parsedBody.data;
+    const {
+      conversationId: rawConversationId,
+      message,
+    } = parsedRequest.data;
 
     let conversationId = rawConversationId ?? undefined;
 
@@ -78,9 +132,6 @@ export async function POST(request: Request) {
         role: "user",
         content: message,
 
-        answered_by: null,
-        model: null,
-
         router_input_tokens: 0,
         router_output_tokens: 0,
         embedding_tokens: 0,
@@ -98,10 +149,16 @@ export async function POST(request: Request) {
 
     const routeDecision = decideAgent(message);
 
+    const agentStartedAt = performance.now();
+
     const agentResult =
       routeDecision.agent === "manager"
         ? await answerWithManager(message)
         : await answerWithSpecialist(message);
+
+    const processingTimeMs = Math.round(
+      performance.now() - agentStartedAt
+    );
 
     const { error: assistantMessageError } = await supabaseAdmin
       .from("messages")
@@ -120,6 +177,8 @@ export async function POST(request: Request) {
         llm_output_tokens: agentResult.usage.llmOutputTokens,
         thought_tokens: agentResult.usage.thoughtTokens,
         total_tokens: agentResult.usage.totalTokens,
+
+        processing_time_ms: processingTimeMs,
       });
 
     if (assistantMessageError) {
@@ -135,6 +194,7 @@ export async function POST(request: Request) {
         answeredBy: agentResult.answeredBy,
         model: agentResult.model,
         usage: agentResult.usage,
+        processingTimeMs,
       },
       {
         status: 200,
@@ -143,15 +203,14 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Chat API error:", error);
 
+    const safeError = getSafeErrorMessage(error);
+
     return Response.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred.",
+        error: safeError.message,
       },
       {
-        status: 500,
+        status: safeError.status,
       }
     );
   }

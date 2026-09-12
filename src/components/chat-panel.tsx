@@ -40,10 +40,10 @@ export function ChatPanel({
                 index === 0
                   ? ""
                   : isReplyToUser
-                    ? "mt-0"
+                    ? "mt-4"
                     : startsNewTurn
-                      ? "mt-4"
-                      : "mt-2";
+                      ? "mt-7"
+                      : "mt-3";
 
               return (
                 <div key={message.id} className={spacingClass}>
@@ -52,6 +52,7 @@ export function ChatPanel({
                     content={message.content}
                     answeredBy={message.answeredBy}
                     totalTokens={message.usage?.totalTokens}
+                    processingTimeMs={message.processingTimeMs}
                   />
                 </div>
               );

@@ -3,12 +3,9 @@ export type AgentName = "manager" | "specialist";
 export type TokenUsage = {
   routerInputTokens: number;
   routerOutputTokens: number;
-
   embeddingTokens: number;
-
   llmInputTokens: number;
   llmOutputTokens: number;
-
   thoughtTokens: number;
   totalTokens: number;
 };
@@ -28,7 +25,7 @@ export type ChatMessageItem = {
   content: string;
   answeredBy?: AgentName;
   usage?: TokenUsage;
-  responseTimeMs?: number;
+  processingTimeMs?: number;
 };
 
 export type ChatApiResponse = {
@@ -37,6 +34,6 @@ export type ChatApiResponse = {
   answeredBy?: AgentName;
   model?: string;
   usage?: TokenUsage;
-  responseTimeMs?: number;
+  processingTimeMs?: number;
   error?: string;
 };
