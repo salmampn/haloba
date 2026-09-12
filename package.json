@@ -6,10 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:documents": "tsx src/scripts/seed-documents.ts",
+    "test:retrieval": "tsx src/scripts/test-retrieval.ts",
+    "test:gemini": "tsx src/scripts/test-gemini.ts"
   },
   "dependencies": {
     "@google/genai": "^2.22.0",
+    "@next/env": "^16.3.5",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "lucide-react": "^1.45.0",
@@ -26,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }
