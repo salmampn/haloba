@@ -6,9 +6,21 @@ import {
   Sparkles,
 } from "lucide-react";
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  className?: string;
+  isMobile?: boolean;
+};
+
+export function AppSidebar({
+  className = "",
+  isMobile = false,
+}: AppSidebarProps) {
+  const visibilityClass = isMobile ? "flex" : "hidden lg:flex";
+
   return (
-    <aside className="aurora-scrollbar hidden h-full w-72 shrink-0 flex-col overflow-y-auto border-r border-slate-300/10 bg-[#0a1930]/75 p-5 backdrop-blur-xl lg:flex">
+    <aside
+      className={`aurora-scrollbar h-full w-72 shrink-0 flex-col overflow-y-auto border-r border-slate-300/10 bg-[#0a1930]/75 p-5 backdrop-blur-xl ${visibilityClass} ${className}`}
+    >
       <div className="flex items-center gap-3 px-2">
         <div className="flex size-10 items-center justify-center rounded-2xl border border-sky-300/25 bg-sky-400/10 text-sky-200 shadow-[0_0_28px_rgba(56,189,248,0.18)]">
           <Sparkles className="size-5" />

@@ -1,16 +1,10 @@
 import { Compass, Sparkles } from "lucide-react";
 import { SuggestionChip } from "@/components/suggestion-chip";
+import { CHAT_SUGGESTIONS } from "@/lib/constants";
 
 type EmptyChatStateProps = {
   onSuggestionClick: (suggestion: string) => void;
 };
-
-const suggestions = [
-  "Apa itu Next.js?",
-  "Berapa hari cuti tahunan?",
-  "Berapa batas reimbursement transportasi?",
-  "Jam kerja dimulai pukul berapa?",
-];
 
 export function EmptyChatState({
   onSuggestionClick,
@@ -41,7 +35,7 @@ export function EmptyChatState({
       </div>
 
       <div className="mt-8 flex max-w-xl flex-wrap justify-center gap-2">
-        {suggestions.map((suggestion) => (
+        {CHAT_SUGGESTIONS.map((suggestion) => (
           <SuggestionChip
             key={suggestion}
             label={suggestion}

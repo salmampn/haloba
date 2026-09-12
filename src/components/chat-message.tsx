@@ -1,16 +1,22 @@
+"use client";
+
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
   BadgeCheck,
   BrainCircuit,
+  Check,
+  CircleAlert,
   Copy,
   Database,
   UserRound,
 } from "lucide-react";
+import { ChatMessageRole, AgentName } from "@/lib/types";
 
 type ChatMessageProps = {
-  role: "user" | "assistant";
+  role: ChatMessageRole;
   content: string;
-  answeredBy?: "manager" | "specialist";
+  answeredBy?: AgentName;
   totalTokens?: number;
 };
 
@@ -20,13 +26,48 @@ export function ChatMessage({
   answeredBy,
   totalTokens,
 }: ChatMessageProps) {
+  const [isCopied, setIsCopied] = useState(false);
+
   const isUser = role === "user";
+  const isError = role === "error";
   const isSpecialist = answeredBy === "specialist";
 
-  async function copyAnswer() {
-    if (!isUser) {
+  async function handleCopy() {
+    try {
       await navigator.clipboard.writeText(content);
+
+      setIsCopied(true);
+
+      window.setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy message:", error);
     }
+  }
+
+  if (isError) {
+    return (
+        <article className="flex w-full gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-rose-300/25 bg-rose-400/10 text-rose-200">
+            <CircleAlert className="h-4 w-4" />
+        </div>
+
+        <div className="max-w-lg sm:max-w-xl">
+            <div className="mb-2 text-xs font-semibold text-rose-100">
+            Connection issue
+            </div>
+
+            <div className="rounded-2xl rounded-tl-md border border-rose-300/20 bg-rose-400/10 px-4 py-3 text-sm leading-6 text-rose-100">
+            <p>{content}</p>
+            </div>
+
+            <p className="mt-2 text-xs text-rose-200/60">
+            Pesan Anda tetap berada dalam percakapan ini. Anda dapat mencoba lagi ketika koneksi sudah stabil.
+            </p>
+        </div>
+        </article>
+    );
   }
 
   return (
@@ -36,7 +77,7 @@ export function ChatMessage({
       }`}
     >
       <div
-        className={`flex size-9 shrink-0 items-center justify-center rounded-xl border ${
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
           isUser
             ? "border-sky-300/30 bg-sky-400/15 text-sky-200"
             : isSpecialist
@@ -45,20 +86,24 @@ export function ChatMessage({
         }`}
       >
         {isUser ? (
-          <UserRound className="size-4" />
+          <UserRound className="h-4 w-4" />
         ) : isSpecialist ? (
-          <Database className="size-4" />
+          <Database className="h-4 w-4" />
         ) : (
-          <BrainCircuit className="size-4" />
+          <BrainCircuit className="h-4 w-4" />
         )}
       </div>
 
       <div
-        className={`max-w-[88%] sm:max-w-[78%] ${
+        className={`max-w-lg sm:max-w-xl ${
           isUser ? "text-right" : ""
         }`}
       >
-        <div className="mb-2 flex items-center gap-2 text-xs">
+        <div
+          className={`mb-2 flex items-center gap-2 text-xs ${
+            isUser ? "justify-end" : ""
+          }`}
+        >
           <span className="font-semibold text-slate-100">
             {isUser ? "You" : "Assistant"}
           </span>
@@ -71,7 +116,7 @@ export function ChatMessage({
                   : "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
               }`}
             >
-              <BadgeCheck className="size-3" />
+              <BadgeCheck className="h-3 w-3" />
               {isSpecialist ? "Specialist" : "Manager"}
             </span>
           )}
@@ -81,7 +126,7 @@ export function ChatMessage({
           className={`rounded-2xl px-4 py-3.5 text-left text-sm leading-6 shadow-sm ${
             isUser
               ? "rounded-tr-md border border-sky-300/20 bg-sky-400 text-[#07111f]"
-              : "rounded-tl-md border border-slate-300/10 bg-white/5.5 text-slate-100 backdrop-blur-sm"
+              : "rounded-tl-md border border-slate-300/10 bg-white/5 text-slate-100 backdrop-blur-sm"
           }`}
         >
           {isUser ? (
@@ -90,7 +135,7 @@ export function ChatMessage({
             <ReactMarkdown
               components={{
                 p: ({ children }) => (
-                  <p className="mb-3 last:mb-0">{children}</p>
+                  <p className="mb-0">{children}</p>
                 ),
 
                 strong: ({ children }) => (
@@ -104,13 +149,13 @@ export function ChatMessage({
                 ),
 
                 ul: ({ children }) => (
-                  <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
+                  <ul className="list-disc space-y-1 pl-5 mb-0">
                     {children}
                   </ul>
                 ),
 
                 ol: ({ children }) => (
-                  <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
+                  <ol className="list-decimal space-y-1 pl-5 mb-0">
                     {children}
                   </ol>
                 ),
@@ -124,7 +169,7 @@ export function ChatMessage({
                 ),
 
                 pre: ({ children }) => (
-                  <pre className="aurora-scrollbar mb-3 overflow-x-auto rounded-xl border border-slate-300/10 bg-[#050d1a] p-3 text-xs leading-5 text-sky-100 last:mb-0">
+                  <pre className="aurora-scrollbar overflow-x-auto rounded-xl border border-slate-300/10 bg-[#050d1a] p-3 text-xs leading-5 text-sky-100 mb-0">
                     {children}
                   </pre>
                 ),
@@ -141,7 +186,7 @@ export function ChatMessage({
                 ),
 
                 blockquote: ({ children }) => (
-                  <blockquote className="mb-3 border-l-2 border-sky-300/50 pl-3 text-slate-300/75 last:mb-0">
+                  <blockquote className="border-l-2 border-sky-300/50 pl-3 text-slate-300/75 mb-0">
                     {children}
                   </blockquote>
                 ),
@@ -152,30 +197,51 @@ export function ChatMessage({
           )}
         </div>
 
-        {!isUser && answeredBy && (
-          <div className="mt-2 flex items-center gap-2 text-xs text-slate-300/55">
-            <span>{totalTokens ?? 0} total tokens</span>
+        <div
+          className={`mt-2 flex items-center gap-2 text-xs ${
+            isUser
+              ? "justify-end text-sky-100/75"
+              : "text-slate-300/55"
+          }`}
+        >
+          {!isUser && answeredBy && (
+            <>
+              <span>{totalTokens ?? 0} total tokens</span>
 
-            <span className="size-1 rounded-full bg-slate-300/30" />
+              <span className="h-1 w-1 rounded-full bg-slate-300/30" />
 
-            <span>
-              {isSpecialist
-                ? "Document-grounded answer"
-                : "General response"}
-            </span>
+              <span>
+                {isSpecialist
+                  ? "Document-grounded answer"
+                  : "General response"}
+              </span>
+            </>
+          )}
 
-            <button
-              type="button"
-              onClick={copyAnswer}
-              className="ml-1 inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-slate-300/55 transition hover:bg-white/5 hover:text-slate-100"
-              aria-label="Copy answer"
-              title="Copy answer"
-            >
-              <Copy className="size-3" />
-              Copy
-            </button>
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={handleCopy}
+            className={`inline-flex items-center gap-1 rounded-md px-1.5 py-1 transition ${
+              isUser
+                ? "text-[#07111f]/65 hover:bg-[#07111f]/10 hover:text-[#07111f]"
+                : "text-slate-300/55 hover:bg-white/5 hover:text-slate-100"
+            }`}
+            aria-label={isCopied ? "Message copied" : "Copy message"}
+            title={isCopied ? "Copied!" : "Copy message"}
+          >
+            {isCopied ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                <span>Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </article>
   );
