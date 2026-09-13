@@ -2,32 +2,30 @@
 
 HALOBA adalah aplikasi chat berbasis **Next.js**, **Google Gemini**, dan **Supabase pgvector** untuk menjawab pertanyaan umum serta pertanyaan kebijakan internal berbasis knowledge base.
 
-Aplikasi menggunakan arsitektur multi-agent ringan:
+Aplikasi menggunakan dua agent:
 
 - **Manager Agent** untuk pertanyaan umum.
-- **Specialist Agent** untuk pertanyaan yang memerlukan informasi dari Employee Handbook.
-- **Rule-based router** untuk memilih agent tanpa memanggil LLM tambahan.
-- **RAG pipeline** untuk mengambil document chunks relevan dari Supabase.
-- **No-context fallback** untuk mencegah hallucination dan menghindari Gemini generation ketika dokumen tidak mendukung jawaban.
+- **Specialist Agent** untuk pertanyaan yang membutuhkan Employee Handbook.
+- **Rule-based router** untuk memilih agent tanpa panggilan LLM tambahan.
+- **RAG pipeline** untuk mengambil document chunks dari Supabase.
+- **Local fallback** ketika tidak ada context dokumen yang cukup relevan.
 
 ## Live Demo
-
-Try the deployed application:
 
 [HALOBA — Multi-Agent Knowledge Assistant](https://haloba-chat.vercel.app/)
 
 ## Features
 
-- Rule-based routing without an LLM router call.
-- Manager agent for general questions.
-- Specialist agent for document-grounded answers.
-- Gemini embeddings and Supabase pgvector semantic search.
-- Employee Handbook knowledge base.
-- Context-limited RAG for token efficiency.
-- Local no-context fallback to prevent hallucination.
-- Token usage and processing-time tracking.
-- Persistent conversations and messages in Supabase.
-- Markdown response rendering and copy button.
+- Single chat interface untuk user.
+- Manager untuk general Q&A.
+- Specialist untuk document-grounded answers.
+- Rule-based routing tanpa token LLM router.
+- Gemini embeddings dan Supabase pgvector semantic search.
+- Context-limited RAG untuk mengurangi token input.
+- Local fallback jika retrieval tidak menemukan context yang cukup.
+- Token usage dan processing-time tracking per response.
+- Conversation dan message history tersimpan di Supabase.
+- Markdown rendering, copy answer button, dan agent metadata di UI.
 
 ## Architecture
 
@@ -44,31 +42,15 @@ Rule-Based Router
     +--> Specialist Agent
            |
            +--> Generate query embedding
+           +--> Supabase pgvector semantic retrieval
            |
-           +--> Supabase pgvector similarity search
-           |
-           +--> Relevant document context found?
+           +--> Relevant context available?
                     |
                     +--> Yes: Gemini document-grounded response
                     |
                     +--> No: Local fallback response
                               (Gemini generation skipped)
 ```
-
-## Tech Stack
-
-| Category        | Technology                  |
-| --------------- | --------------------------- |
-| Framework       | Next.js                     |
-| Language        | TypeScript                  |
-| Styling         | Tailwind CSS                |
-| AI SDK          | `@google/genai`             |
-| LLM             | Google Gemini               |
-| Embeddings      | Google Gemini Embedding API |
-| Database        | Supabase PostgreSQL         |
-| Vector database | pgvector                    |
-| Icons           | Lucide React                |
-| Validation      | Zod                         |
 
 ## Knowledge Base
 
@@ -78,42 +60,83 @@ The default knowledge base is stored in:
 src/data/employee-handbook.txt
 ```
 
-The handbook includes demo policies for:
+The demo Employee Handbook includes policies related to:
 
 - Annual leave.
 - Transportation reimbursement.
 - Working hours and hybrid work.
-- Company equipment.
+- Company devices and equipment.
 - Benefits and compensation.
 - Overtime and public holidays.
 - Business travel.
-- Data security and company-device usage.
+- Data security.
 - Employee onboarding and probation.
 
-Example document-grounded questions:
+Example supported questions:
 
 ```text
-Berapa batas reimbursement transportasi?
 Berapa hari cuti tahunan?
-Kapan laporan perjalanan dinas harus dikirim?
+Berapa batas reimbursement transportasi?
 Apa aturan password akun kerja?
+Kapan laporan perjalanan dinas harus dikirim?
 Berapa tunjangan komunikasi?
 Berapa lama masa percobaan karyawan baru?
 ```
 
-Example questions without supporting handbook context:
+Example questions that may not have explicit support in the handbook:
 
 ```text
-Apa kebijakan kendaraan dinas?
 Apakah ada subsidi parkir kantor?
-Berapa tunjangan makan?
+Berapa tunjangan makan karyawan?
+Apakah perusahaan menyediakan mobil operasional?
 ```
 
-Unsupported handbook queries return a local no-context response instead of a generated policy answer.
+For unsupported questions, HALOBA returns a local no-context response when retrieval does not find sufficient evidence:
+
+```text
+Saya tidak menemukan informasi terkait pertanyaan tersebut pada dokumen yang tersedia.
+```
+
+For questions that are related to an available topic but not explicitly covered, the Specialist may provide the closest relevant handbook information while indicating the limitation of the available context.
+
+## Token Optimization
+
+HALOBA reduces unnecessary token usage through:
+
+- **Rule-based routing:** agent selection is handled locally, so router token usage is `0`.
+- **Selective retrieval:** only handbook-related questions are routed to Specialist.
+- **Similarity threshold:** low-relevance semantic chunks are filtered before generation.
+- **Context limits:** retrieved chunks and context size are capped before being sent to Gemini.
+- **Adaptive output limits:** factual questions use lower output-token limits than procedural questions.
+- **No-generation fallback:** Gemini generation is skipped when no relevant context is available.
+
+Example metadata for a local fallback:
+
+```text
+Model: no-generation-needed
+LLM input tokens: 0
+LLM output tokens: 0
+Thought tokens: 0
+```
+
+> Note: Embedding usage may not appear in the displayed total if the embedding provider does not return token metadata. Retrieval may still add latency even when Gemini text generation is skipped.
+
+## Tech Stack
+
+| Category | Technology |
+|---|---|
+| Framework | Next.js |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| AI SDK | `@google/genai` |
+| LLM and embeddings | Google Gemini |
+| Database | Supabase PostgreSQL |
+| Vector search | pgvector |
+| Validation | Zod |
+| Icons | Lucide React |
+| Deployment | Vercel |
 
 ## Prerequisites
-
-Install the following tools before running the project:
 
 - Node.js 20 or newer.
 - npm.
@@ -122,22 +145,10 @@ Install the following tools before running the project:
 
 ## Installation
 
-Clone the repository:
-
 ```bash
-git clone [https://github.com/salmampn/multi-agent-chat.git](https://github.com/salmampn/multi-agent-chat.git)
-cd multi-agent-chat
-```
-
-Install dependencies:
-
-```bash
+git clone [https://github.com/salmampn/haloba.git](https://github.com/salmampn/haloba.git)
+cd haloba
 npm install
-```
-
-Create an environment file:
-
-```bash
 cp .env.example .env
 ```
 
@@ -152,21 +163,21 @@ NEXT_PUBLIC_SUPABASE_URL=[https://your-project-ref.supabase.co](https://your-pro
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_SECRET_KEY=your_supabase_secret_key
 
-MANAGER_MODEL=manager_model
-SPECIALIST_MODEL=specialist_model
-EMBEDDING_MODEL=embedding_model
+MANAGER_MODEL=your_manager_model
+SPECIALIST_MODEL=your_specialist_model
+EMBEDDING_MODEL=your_embedding_model
 ```
 
-### Security notes
+### Security Notes
 
 - Never commit `.env`.
-- Never expose `SUPABASE_SECRET_KEY` in client-side code.
-- Only use the Supabase secret key from server-side code, such as API routes, server actions, or scripts.
-- Rotate API keys immediately if they are exposed in a repository, screenshot, terminal output, or deployment log.
+- Never expose `SUPABASE_SECRET_KEY` in browser/client-side code.
+- Use the Supabase secret key only in server-side code, API routes, or seed scripts.
+- Rotate credentials immediately if a key is exposed.
 
 ## Supabase Setup
 
-Run the schema from:
+Run the schema located at:
 
 ```text
 src/lib/supabase/schema.sql
@@ -174,14 +185,15 @@ src/lib/supabase/schema.sql
 
 The schema creates:
 
-- `conversations`
-- `messages`
-- `documents`
-- `document_chunks`
-- `match_document_chunks()` RPC function
-- pgvector embedding index
+```text
+conversations
+messages
+documents
+document_chunks
+match_document_chunks()
+```
 
-The `messages` table stores agent metadata and token metrics:
+The `messages` table records agent and token metadata:
 
 ```text
 answered_by
@@ -198,43 +210,33 @@ processing_time_ms
 
 ## Seed Knowledge Base
 
-The project seeds the employee handbook from:
+The Employee Handbook source is located at:
 
 ```text
 src/data/employee-handbook.txt
 ```
 
-Run the seed script:
+Seed the handbook and embeddings:
 
 ```bash
 npm run seed:documents
 ```
 
-The script performs the following process:
-
-1. Reads the employee handbook text file.
-2. Creates a document row in Supabase.
-3. Splits handbook content into chunks.
-4. Generates a 768-dimension embedding for each chunk.
-5. Stores each chunk and embedding in `document_chunks`.
-
-### Reset and reseed documents
-
-To remove old documents before reseeding, run this SQL in Supabase SQL Editor:
+To remove existing documents before reseeding, run this query in Supabase SQL Editor:
 
 ```sql
 delete from public.documents;
 ```
 
-Because `document_chunks.document_id` uses `on delete cascade`, related chunks are removed automatically.
+Related document chunks are removed automatically through `on delete cascade`.
 
-Then run:
+Then seed the updated handbook:
 
 ```bash
 npm run seed:documents
 ```
 
-Verify seeded data:
+Verify seeded content:
 
 ```sql
 select
@@ -248,71 +250,105 @@ group by d.id, d.title, d.source
 order by d.title;
 ```
 
-## Development
+## Commands
 
-Start the local development server:
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start the development server |
+| `npm run build` | Build the production application |
+| `npm run start` | Run the production build locally |
+| `npm run lint` | Run ESLint |
+| `npm run seed:documents` | Seed handbook documents and embeddings |
+| `npm run test:gemini` | Test Gemini API connection |
+| `npm run test:router` | Test rule-based routing |
+| `npm run test:retrieval` | Test document retrieval |
+| `npm run test:agents` | Test Manager and Specialist agents |
+| `npm run test:rpc` | Test Supabase vector-search RPC |
+
+## Testing
+
+Before deployment:
 
 ```bash
-npm run dev
+npm run lint
+npm run build
 ```
 
-Open:
+Recommended manual tests:
 
-```text
-http://localhost:3000
-```
-
-## Available Scripts
-
-| Command                  | Purpose                                         |
-| ------------------------ | ----------------------------------------------- |
-| `npm run dev`            | Start Next.js development server                |
-| `npm run build`          | Build the production application                |
-| `npm run start`          | Run the production build locally                |
-| `npm run lint`           | Run ESLint                                      |
-| `npm run seed:documents` | Seed Employee Handbook documents and embeddings |
-| `npm run test:gemini`    | Test Gemini API connection                      |
-| `npm run test:retrieval` | Test document retrieval                         |
-| `npm run test:agents`    | Test Manager and Specialist agents              |
-| `npm run test:rpc`       | Test Supabase vector RPC function               |
-| `npm run test:router`    | Test router logic                               |
-
-### Recommended manual test cases
-
-| Query                                           | Expected result                                             |
-| ----------------------------------------------- | ----------------------------------------------------------- |
-| `Apa itu Next.js?`                              | Manager general response                                    |
-| `Berapa hari cuti tahunan?`                     | Specialist document-grounded response                       |
-| `Berapa batas reimbursement transportasi?`      | Specialist answer: Rp150.000 per hari                       |
-| `Apa aturan password akun kerja?`               | Specialist document-grounded response                       |
+| Query | Expected result |
+|---|---|
+| `Apa itu Next.js?` | Manager general response |
+| `Berapa hari cuti tahunan?` | Specialist answer grounded in the handbook |
+| `Berapa batas reimbursement transportasi?` | Specialist answer: Rp150.000 per hari |
+| `Apa aturan password akun kerja?` | Specialist answer grounded in the handbook |
 | `Kapan laporan perjalanan dinas harus dikirim?` | Specialist answer: maksimal tiga hari kerja setelah kembali |
-| `Berapa lama masa percobaan karyawan baru?`     | Specialist answer: tiga bulan                               |
-| `Apa kebijakan kendaraan dinas?`                | No matching document fallback, without Gemini generation    |
+| `Berapa lama masa percobaan karyawan baru?` | Specialist answer: tiga bulan |
+| `Apakah ada subsidi parkir kantor?` | Specialist fallback if no supporting context is found |
+
+## Token Monitoring
+
+Inspect recent assistant responses:
+
+```sql
+select
+  content,
+  answered_by,
+  model,
+  embedding_tokens,
+  llm_input_tokens,
+  llm_output_tokens,
+  thought_tokens,
+  total_tokens,
+  processing_time_ms,
+  created_at
+from public.messages
+where role = 'assistant'
+order by created_at desc
+limit 20;
+```
+
+Check local fallback usage:
+
+```sql
+select
+  content,
+  model,
+  llm_input_tokens,
+  llm_output_tokens,
+  thought_tokens,
+  total_tokens,
+  created_at
+from public.messages
+where role = 'assistant'
+  and model = 'no-generation-needed'
+order by created_at desc;
+```
 
 ## Limitations
 
-This project is a demonstration MVP.
+HALOBA is an educational and portfolio MVP.
 
-- The knowledge base contains demo employee-policy content.
-- Routing is rule-based and may require maintenance when new document domains are added.
-- In-memory caches, if added, are not guaranteed to persist in serverless environments.
-- The UI token total may not include embedding usage if the embedding provider does not return usage metadata.
-- The application does not include authentication or per-user document access control.
-- Documents are seeded from a local text file rather than uploaded through an admin interface.
+- The Employee Handbook contains demo policy data.
+- Routing is rule-based and needs maintenance when new domains are added.
+- Semantic search can return context that is topically related but not specific enough to fully answer a question.
+- A similarity threshold reduces false positives but does not eliminate every partial-relevance case.
+- No authentication or per-user document access control is implemented yet.
+- Documents are seeded from a local text file rather than uploaded through an admin dashboard.
+- Token totals may not include embedding usage when embedding token metadata is unavailable.
 
 ## Future Improvements
 
-- Add authentication and Row Level Security policies.
-- Support document upload and ingestion from an admin dashboard.
+- Add authentication and Supabase Row Level Security.
+- Add hybrid search using PostgreSQL full-text search and pgvector.
+- Add a retrieval acceptance gate and reranking for larger knowledge bases.
 - Add document citations and source previews in the chat UI.
+- Add document upload and ingestion via an admin dashboard.
 - Add automated router and retrieval regression tests.
-- Add per-user conversations and document permissions.
-- Add database-backed or Redis-backed embedding cache.
-- Add hybrid search with PostgreSQL full-text search and vector search.
-- Add observability dashboard for agent routing, retrieval quality, token cost, and latency.
-- Add conversation memory with context-window limits and summaries.
-- Add rate limiting and request-level abuse protection.
+- Add database-backed embedding caching.
+- Add conversation memory with context limits and summarization.
+- Add rate limiting and abuse protection.
 
 ## License
 
-This project is intended for educational and portfolio purposes.
+Educational and portfolio use.
