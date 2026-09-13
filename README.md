@@ -146,7 +146,7 @@ Thought tokens: 0
 ## Installation
 
 ```bash
-git clone [https://github.com/salmampn/haloba.git](https://github.com/salmampn/haloba.git)
+git clone https://github.com/salmampn/haloba.git
 cd haloba
 npm install
 cp .env.example .env
@@ -159,7 +159,7 @@ Create `.env` in the project root:
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 
-NEXT_PUBLIC_SUPABASE_URL=[https://your-project-ref.supabase.co](https://your-project-ref.supabase.co)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_SECRET_KEY=your_supabase_secret_key
 
