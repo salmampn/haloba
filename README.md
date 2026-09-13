@@ -10,6 +10,12 @@ Aplikasi menggunakan arsitektur multi-agent ringan:
 - **RAG pipeline** untuk mengambil document chunks relevan dari Supabase.
 - **No-context fallback** untuk mencegah hallucination dan menghindari Gemini generation ketika dokumen tidak mendukung jawaban.
 
+## Live Demo
+
+Try the deployed application:
+
+[HALOBA — Multi-Agent Knowledge Assistant](https://haloba-chat.vercel.app/)
+
 ## Features
 
 - Rule-based routing without an LLM router call.

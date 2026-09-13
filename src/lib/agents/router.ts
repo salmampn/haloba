@@ -109,6 +109,30 @@ const SPECIALIST_PATTERNS = [
   /\bprobation\b/i,
   /\bevaluasi karyawan\b/i,
   /\bpeople operations\b/i,
+
+    // Internal policy / benefits / facilities
+  /\bsubsidi\b/i,
+  /\bfasilitas\b/i,
+  /\bparkir\b/i,
+  /\buang makan\b/i,
+  /\btunjangan makan\b/i,
+  /\ballowance\b/i,
+  /\bbiaya kantor\b/i,
+  /\bklaim\b/i,
+  /\bpenggantian biaya\b/i,
+  /\bbiaya bensin\b/i,
+  /\bbiaya tol\b/i,
+  /\bbiaya hotel\b/i,
+  /\bbiaya penginapan\b/i,
+  /\bbiaya internet\b/i,
+  /\binternet rumah\b/i,
+  /\bseragam\b/i,
+  /\bvoucher\b/i,
+  /\bgym\b/i,
+  /\bkantin\b/i,
+  /\bkendaraan\b/i,
+  /\bmobil kantor\b/i,
+  /\bmobil operasional\b/i,
 ];
 
 function findMatchedPattern(message: string) {

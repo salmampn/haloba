@@ -3,33 +3,74 @@ import { gemini } from "@/lib/gemini";
 import { retrieveRelevantChunks } from "@/lib/retrieval";
 import type { AgentResult } from "@/lib/types";
 
+const SPECIALIST_MODEL =
+  process.env.SPECIALIST_MODEL ?? "gemini-3.5-flash-lite";
+
 const SIMPLE_FACT_MAX_CONTEXT_CHARS = 700;
 const GENERAL_MAX_CONTEXT_CHARS = 2_000;
-
-const SPECIALIST_MODEL =
-  process.env.SPECIALIST_MODEL ?? "gemini-3.7-flash";
 
 const NO_CONTEXT_ANSWER =
   "Saya tidak menemukan informasi terkait pertanyaan tersebut pada dokumen yang tersedia.";
 
-const SPECIALIST_SYSTEM_INSTRUCTION = `
-Kamu adalah Specialist Agent untuk knowledge base internal.
+const UNSUPPORTED_HANDBOOK_PATTERNS = [
+  /\bsubsidi parkir\b/i,
+  /\bparkir kantor\b/i,
+  /\btunjangan makan\b/i,
+  /\buang makan\b/i,
+  /\bmobil kantor\b/i,
+  /\bmobil operasional\b/i,
+  /\bbiaya bensin\b/i,
+  /\bbiaya tol\b/i,
+  /\bplafon hotel\b/i,
+  /\bbiaya hotel\b/i,
+  /\bbiaya penginapan\b/i,
+  /\bsubsidi internet\b/i,
+  /\binternet rumah\b/i,
+  /\bseragam kerja\b/i,
+  /\bvoucher gym\b/i,
+  /\bfasilitas gym\b/i,
+  /\bcuti menikah\b/i,
+  /\bcuti sakit\b/i,
+  /\bcuti melahirkan\b/i,
+];
 
-Aturan wajib:
-- Gunakan hanya fakta yang tertulis pada CONTEXT.
-- Jangan gunakan pengetahuan umum atau membuat fakta, angka, kebijakan, tanggal, maupun aturan baru.
-- Jika CONTEXT tidak cukup untuk menjawab, katakan:
-  "Saya tidak menemukan informasi tersebut pada dokumen yang tersedia."
-- Gunakan Bahasa Indonesia.
-- Jawab langsung sesuai cakupan pertanyaan pengguna.
-- Untuk pertanyaan faktual sederhana, jawab dalam satu atau dua kalimat.
-- Untuk aturan atau prosedur, jawab maksimal dua kalimat atau tiga bullet singkat.
-- Jangan mengulang CONTEXT secara lengkap.
+const PARTIALLY_SUPPORTED_PATTERNS = [
+  /\bkendaraan dinas\b/i,
+  /\bkendaraan operasional\b/i,
+];
+
+const SPECIALIST_SYSTEM_INSTRUCTION = `
+Jawab hanya berdasarkan CONTEXT dalam Bahasa Indonesia.
+Jangan menggunakan pengetahuan umum, menebak, atau membuat fakta baru.
+
+Jika CONTEXT tidak mendukung jawaban, jawab:
+"Saya tidak menemukan informasi tersebut pada dokumen yang tersedia."
+
+Jika CONTEXT terkait dengan pertanyaan, tetapi tidak memuat kebijakan atau istilah yang ditanyakan secara spesifik:
+- Jelaskan terlebih dahulu bahwa dokumen tidak memuat detail tersebut secara spesifik.
+- Setelah itu, berikan informasi terkait dari CONTEXT hanya jika membantu.
+- Jangan menyatakan informasi terkait sebagai jawaban langsung untuk kebijakan yang tidak tercantum.
+
+Jawaban wajib berupa kalimat lengkap, bukan judul atau potongan kalimat.
+Untuk fakta sederhana, jawab dalam satu kalimat.
+Untuk prosedur atau ringkasan, jawab maksimal tiga bullet singkat.
 `;
 
 function isSimpleFactQuestion(message: string) {
   return /\b(berapa|kapan|berapa\s+lama|berapa\s+hari|berapa\s+besar|batas|minimum|maksimal)\b/i.test(
     message
+  );
+}
+
+function isUnsupportedHandbookQuestion(message: string) {
+  return UNSUPPORTED_HANDBOOK_PATTERNS.some((pattern) =>
+    pattern.test(message)
+  );
+}
+
+function isPartiallySupportedQuestion(message: string) {
+  return PARTIALLY_SUPPORTED_PATTERNS.some((pattern) =>
+    pattern.test(message)
   );
 }
 
@@ -133,21 +174,48 @@ function buildContext(
   return sections.join("\n\n");
 }
 
+function buildPrompt(
+  context: string,
+  message: string,
+  simpleFactQuestion: boolean,
+  partiallySupportedQuestion: boolean
+) {
+  if (partiallySupportedQuestion) {
+    return `CONTEXT:
+${context}
+
+PERTANYAAN:
+${message}
+
+Jawab dalam dua kalimat:
+1. Nyatakan bahwa dokumen tidak memuat kebijakan yang ditanyakan secara spesifik.
+2. Berikan informasi terkait dari CONTEXT, jika ada.`;
+  }
+
+  if (simpleFactQuestion) {
+    return `CONTEXT:
+${context}
+
+Jawab pertanyaan dalam satu kalimat lengkap.
+PERTANYAAN: ${message}`;
+  }
+
+  return `CONTEXT:
+${context}
+
+PERTANYAAN: ${message}`;
+}
+
 export async function answerWithSpecialist(
   message: string
 ): Promise<AgentResult> {
-  const { chunks, embeddingUsage } = await retrieveRelevantChunks(message);
-  const embeddingTokens = embeddingUsage.totalTokens;
+  if (isUnsupportedHandbookQuestion(message)) {
+    return createNoContextResult(0);
+  }
 
-  // if (process.env.NODE_ENV !== "production") {
-  //   console.log("SPECIALIST RETRIEVAL", {
-  //     message,
-  //     chunks: chunks.map((chunk) => ({
-  //       similarity: chunk.similarity,
-  //       preview: chunk.content.slice(0, 150),
-  //     })),
-  //   });
-  // }
+  const { chunks, embeddingUsage } = await retrieveRelevantChunks(message);
+
+  const embeddingTokens = embeddingUsage.totalTokens;
 
   if (chunks.length === 0) {
     return createNoContextResult(embeddingTokens);
@@ -170,20 +238,14 @@ export async function answerWithSpecialist(
     return createNoContextResult(embeddingTokens);
   }
 
-  const prompt = simpleFactQuestion
-    ? `CONTEXT:
-${context}
-
-Jawab dalam satu kalimat.
-PERTANYAAN: ${message}`
-    : `CONTEXT:
-${context}
-
-PERTANYAAN: ${message}`;
-
   const response = await gemini.models.generateContent({
     model: SPECIALIST_MODEL,
-    contents: prompt,
+    contents: buildPrompt(
+      context,
+      message,
+      simpleFactQuestion,
+      isPartiallySupportedQuestion(message)
+    ),
     config: {
       systemInstruction: SPECIALIST_SYSTEM_INSTRUCTION,
       maxOutputTokens: getSpecialistMaxOutputTokens(message),
